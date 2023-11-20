@@ -10,25 +10,28 @@
 ;; (trivial-indent:define-indentation define-enum
 ;;   (4 4 &lambda &body))
 
+(defbinary corsika-page-spliter ()
+  (spliter 0d0 :type single-float))
+
 (defbinary program-info ()
   (run-number 0d0 :type single-float)
   (start-date 0d0 :type single-float)
-  (program-version 0d0 :type single-float))
+  (version 0d0 :type single-float))
 
 (defbinary observation-info ()
   (observation-level-number  0d0 :type single-float)
   (observation-level-heights #() :type (simple-array single-float (10))))
 
 (defbinary energy-info ()
-  (energy-spectrum-slope 0d0 :type single-float)
-  (energy-lower-limit    0d0 :type single-float)
-  (energy-upper-limit    0d0 :type single-float))
+  (spectrum-slope 0d0 :type single-float)
+  (lower-limit    0d0 :type single-float)
+  (upper-limit    0d0 :type single-float))
 
 (defbinary energy-cutoff ()
-  (hardron-cutoff  0d0 :type single-float)
-  (muon-cutoff     0d0 :type single-float)
-  (electron-cutoff 0d0 :type single-float)
-  (photon-cutoff   0d0 :type single-float))
+  (hardron  0d0 :type single-float)
+  (muon     0d0 :type single-float)
+  (electron 0d0 :type single-float)
+  (photon   0d0 :type single-float))
 
 (defbinary inclined-observation-plane ()
   (x 0d0 :type single-float)
@@ -46,6 +49,7 @@
 
   ;; EGS4 flag
   (EGS4-flag 0d0 :type single-float)
+  ;; NKG flag
   (NKG-flag  0d0 :type single-float)
 
   ;; energy cutoff
@@ -84,20 +88,31 @@
   ;; some meaning less (? doubt) parameters
   (HLAY #() :type (simple-array single-float (5)))
   (AATM #() :type (simple-array single-float (5)))
+  (BATM #() :type (simple-array single-float (5)))
   (CATM #() :type (simple-array single-float (5)))
   (NFLAIN 0d0 :type single-float)
   (NFLDIF 0d0 :type single-float)
   (NFLPI0+100xNFLPIF 0d0 :type single-float)
   (NFLCHE+100xNFRAGM 0d0 :type single-float))
 
+(defbinary cherenkov-info ()
+  (bunch-size 0d0 :type single-float)
+  (detector-x-num 0d0 :type single-float)
+  (detector-y-num 0d0 :type single-float)
+  (detector-grid-x 0d0 :type single-float)
+  (detector-grid-y 0d0 :type single-float)
+  (detector-len-x  0d0 :type single-float)
+  (detector-len-y  0d0 :type single-float)
+  (output-file     0d0 :type single-float))
+
 (defbinary event-header ()
   (type "EVTH" :type (fixed-length-string 4))
 
   ;; event info
-  (event-number 0d0 :type single-float)
-  (particle-id  0d0 :type single-float)
-  (energy       0d0 :type single-float)
-  (altitude     0d0 :type single-float)
+  (event-number    0d0 :type single-float)
+  (particle-id     0d0 :type single-float)
+  (particle-energy 0d0 :type single-float)
+  (altitude        0d0 :type single-float)
   
   (first-target-number 0d0 :type single-float)
   (first-interaction-z 0d0 :type single-float)
@@ -121,5 +136,39 @@
 
   ;; energy spectrum
   (energy nil :type energy-info)
-  
+
+  ;; flags
+  (NFLAIN 0d0 :type single-float)
+  (NFLDIF 0d0 :type single-float)
+  (NFLPI0 0d0 :type single-float)
+  (NFLCHE 0d0 :type single-float)
+  (NFRAGM 0d0 :type single-float)
+
+  ;; earth-magnetic-field
+  (earth-magnetic-field-x 0d0 :type single-float)
+  (earth-magnetic-field-y 0d0 :type single-float)
+
+  ;; flags
+  (EGS4-flag 0d0 :type single-float)
+  (NKG-flag  0d0 :type single-float)
+
+  ;; low-energy hadr. model flag
+  (low-energy-hadr-flag  0d0 :type single-float)
+  (high-energy-hadr-flag 0d0 :type single-float)
+
+  ;; flags
+  (CERENKOV-flag 0d0 :type single-float)
+  (NEUTRINO-flag 0d0 :type single-float)
+  (CURVED-flag   0d0 :type single-float)
+  (computer-flag 0d0 :type single-float)
+
+  ;; geometry info
+  (theta-lower-edge 0d0 :type single-float)
+  (theta-upper-edge 0d0 :type single-float)
+  (phi-lower-edge   0d0 :type single-float)
+  (phi-upper-edge   0d0 :type single-float)
+
+  ;; cherenkov info
+  (cherenkov nil :type cherenkov-info)
   )
+
