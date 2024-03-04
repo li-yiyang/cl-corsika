@@ -1,0 +1,56 @@
+#+title: CL-CORSIKA
+#+author: 凉凉
+* ATTENTION
+*CL-CORSIKA is still WIP, feel free to make issue, request*
+*functionalities or contribute to the repo*
+
+* About
+Ah, I was doing my Corsika simulation work while I happend
+to found that COAST does not compile on my poor machine,
+which brings me trouble while reading Corsika binary output
+files.
+
+So at that time, I thought, that, why could not ME, MYSELF
+wrote a program that reads the binary output instead? So
+here it goes, the CL-CORSIKA package.
+
+Right now, it's mostly focus on Corsika 7.75 and dealing
+with the reading tasks.
+
+*BUT PLEASE NOTE THAT* CL-CORSIKA does *NOT* intend to replace
+Corsika or rewrite Corsika, for those purpose, please refer
+to Corsika 8 for more details. CL-CORSIKA is kinda like an
+enhance interface in lisp for Corsika or more simpler, just
+an automation scripts for my Corsika simulation works.
+
+* Progress
+** CL-CORSIKA/BINARY
+Package =cl-corsika/binary= is for reading Corsika binary
+output file structure. 
+
+Currently it's work in progress. You could just load it to
+have a simple try:
+
+#+begin_src lisp
+  ;; Make sure cl-corsika is under quicklisp load path
+  ;; for example, `~/quicklisp/local-project'.
+  (ql:quickload '(cl-corsika/binary))
+
+  ;; Currently it's under develop, so no method is exported.
+  ;; All you have to do is to switch into `cl-corsika/binary'
+  ;; package and use `with-corsika-binary-output' and
+  ;; `read-type' method.
+  (in-package :cl-corsika/binary)
+
+  (with-corsika-binary-output (corsika "PATH/TO/YOUR/OUTPUT")
+    (read-type :int corsika)              ; -> 29932 if not thin
+    (read-type :run-header corsika)       ; -> run-header
+    ;; ...
+    )
+#+end_src
+
+*TODO MEMO*:
++ Add automated parser for structured reading output
++ Double check =corsika-defbin.lisp=
++ Add export functionality in =defbin.lisp=
++ Easier alias names for slots reading
