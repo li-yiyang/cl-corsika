@@ -293,3 +293,12 @@
   (energy-cutoff :type energy-cutoff)
   (long-hist     :type (:array long-hist 21)))
 
+;;; The following is Corsika output structure that is not defined by
+;;; `defbin'. The following defination declares the structure of
+;;; corsika binary output.
+
+(defstruct run
+  header events end)
+
+(defstruct event
+  header datablocks long-blocks end)
