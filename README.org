@@ -42,15 +42,22 @@ have a simple try:
   ;; `read-type' method.
   (in-package :cl-corsika/binary)
 
-  (with-corsika-binary-output (corsika "PATH/TO/YOUR/OUTPUT")
-    (read-type :int corsika)              ; -> 29932 if not thin
-    (read-type :run-header corsika)       ; -> run-header
+  ;;; High-level methods:
+  (with-open-corsika (corsika "PATH/TO/YOUR/OUTPUT")
+    (run-header corsika)                  ; -> get run-header of `corsika'
     ;; ...
     )
+
+  ;;; Low-level methods:
+  ;; (with-corsika-binary-output (corsika "PATH/TO/YOUR/OUTPUT")
+  ;;   (read-type :int corsika)              ; -> 29932 if not thin
+  ;;   (read-type :run-header corsika)       ; -> run-header
+  ;;   ;; ...
+  ;;   )
 #+end_src
 
 *TODO MEMO*:
-+ Add automated parser for structured reading output
++ [DONE] +Add automated parser for structured reading output+
 + Double check =corsika-defbin.lisp=
 + Add export functionality in =defbin.lisp=
 + Easier alias names for slots reading
