@@ -59,6 +59,27 @@ A complex type is like `(:array :float 10)' type."
         (:str   'string)
         (otherwise t))))
 
+(defparameter *corsika-binary-type-size*
+  (make-hash-table)
+  "Get corsika binary type size.")
+
+(defun type-size (type &optional (size 1 size-set-p))
+  "Get type size for `type', if provided `size', set type size."
+  (if (complex-type-p type)
+      (ecase (first type)
+        (:array (* (type-size (second type)) (third type))))
+      (let ((type (if (keywordp type) type (make-keyword type))))
+        (if size-set-p
+            (setf (gethash type *corsika-binary-type-size*) size)
+            (let ((size (gethash type *corsika-binary-type-size* nil)))
+              (if size size
+                  (error (format nil "type ~a is not defined yet." type))))))))
+
+;; Register basic type size in `*corsika-binary-type-size*'.
+(type-size :float 1)
+(type-size :int   1)
+(type-size :str   1)
+
 (defparameter *corsika-binary-readers*
   (make-hash-table)
   "Corsika and basic binary reader function table.")
@@ -143,7 +164,7 @@ Return (slot-name . plist-properties).
                                `(else collect (progn ,@no-use-expr))))))))
 
 ;;; defbin
-(defmacro defbin (name (&key (default-type :float)
+(defmacro defbin (name (&key (default-type :float) (size-check nil size-check-set-p)
                           (reader-table '*corsika-binary-readers*)
                           (eof-error-p t) eof-value)
                   &body slot-definitions)
@@ -164,6 +185,7 @@ Return (slot-name . plist-properties).
              (list (car slot-def)
                    (default-type-value (getf (cdr slot-def) :type))
                    :type (default-type-name (getf (cdr slot-def) :type)))))
+       
        ;; define binary reader
        (setf (gethash ,(make-keyword name) ,reader-table)
              ,(with-gensyms (stream res)
@@ -181,4 +203,17 @@ Return (slot-name . plist-properties).
                          :no-use
                          `(dotimes (_ ,(getf (cdr slot-def) :offset))
                             (read-byte ,stream eof-error-p eof-value)))
-                     ,res)))))))
+                     ,res))))
+
+       ;; calculate and regist binary size
+       (type-size ',name
+                  (+ ,@(with-slots-definitions (slot-def slot-definitions
+                                                         :type default-type
+                                                         :offset 1)
+                         `(type-size ',(getf (cdr slot-def) :type))
+                         :no-use
+                         (getf (cdr slot-def) :offset))))
+       ,(when size-check-set-p
+          `(when (not (eq (type-size ',name) ,size-check))
+             (error (format nil "Type ~a should be of size ~a rather than ~a."
+                            ',name ,size-check (type-size ',name))))))))

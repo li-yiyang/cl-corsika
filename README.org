@@ -58,6 +58,6 @@ have a simple try:
 
 *TODO MEMO*:
 + [DONE] +Add automated parser for structured reading output+
-+ Double check =corsika-defbin.lisp=
++ [DONE] +Double check =corsika-defbin.lisp=+
 + Add export functionality in =defbin.lisp=
 + Easier alias names for slots reading
