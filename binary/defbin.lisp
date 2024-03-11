@@ -164,7 +164,9 @@ Return (slot-name . plist-properties).
                                `(else collect (progn ,@no-use-expr))))))))
 
 ;;; defbin
-(defmacro defbin (name (&key (default-type :float) (size-check nil size-check-set-p)
+(defmacro defbin (name (&key (default-type :float)
+                          (size-check nil size-check-set-p)
+                          (export t)
                           (reader-table '*corsika-binary-readers*)
                           (eof-error-p t) eof-value)
                   &body slot-definitions)
@@ -181,6 +183,8 @@ Return (slot-name . plist-properties).
        ;; define binary structure
        (defstruct (,name (:constructor ,constructor)
                          (:conc-name ,(make-symbol (format nil "~:@(~a~)-" name))))
+         ;; the `with-slots-definitions' macro here is used to generate
+         ;; structure slot definition: (name default-value :type type)
          ,@(with-slots-definitions (slot-def slot-definitions :type default-type)
              (list (car slot-def)
                    (default-type-value (getf (cdr slot-def) :type))
@@ -216,4 +220,13 @@ Return (slot-name . plist-properties).
        ,(when size-check-set-p
           `(when (not (eq (type-size ',name) ,size-check))
              (error (format nil "Type ~a should be of size ~a rather than ~a."
-                            ',name ,size-check (type-size ',name))))))))
+                            ',name ,size-check (type-size ',name)))))
+
+       ;; export struct with its name
+       ,(when export
+          (flet ((slot-reader (slot-def)
+                   (intern (format nil "~:@(~a~)-~:@(~a~)" name (car slot-def)))))
+            `(progn
+               (export ',name)            ; export structure type
+               ,@(with-slots-definitions (slot-def slot-definitions)
+                   `(export ',(slot-reader slot-def)))))))))

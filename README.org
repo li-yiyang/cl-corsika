@@ -36,19 +36,14 @@ have a simple try:
   ;; for example, `~/quicklisp/local-project'.
   (ql:quickload '(cl-corsika/binary))
 
-  ;; Currently it's under develop, so no method is exported.
-  ;; All you have to do is to switch into `cl-corsika/binary'
-  ;; package and use `with-corsika-binary-output' and
-  ;; `read-type' method.
-  (in-package :cl-corsika/binary)
-
   ;;; High-level methods:
-  (with-open-corsika (corsika "PATH/TO/YOUR/OUTPUT")
-    (run-header corsika)                  ; -> get run-header of `corsika'
+  (cl-corsika/binary:with-open-corsika (corsika "PATH/TO/YOUR/OUTPUT")
+    (cl-corsika/binary:run-header corsika) ; -> get run-header of `corsika'
     ;; ...
     )
 
   ;;; Low-level methods:
+  ;; These functions are not exported.
   ;; (with-corsika-binary-output (corsika "PATH/TO/YOUR/OUTPUT")
   ;;   (read-type :int corsika)              ; -> 29932 if not thin
   ;;   (read-type :run-header corsika)       ; -> run-header
@@ -59,5 +54,5 @@ have a simple try:
 *TODO MEMO*:
 + [DONE] +Add automated parser for structured reading output+
 + [DONE] +Double check =corsika-defbin.lisp=+
-+ Add export functionality in =defbin.lisp=
++ [DONE] +Add export functionality in =defbin.lisp=+
 + Easier alias names for slots reading
