@@ -12,4 +12,5 @@
   :pathname "binary"
   :components ((:file "package")
                (:file "defbin")
-               (:file "corsika-defbin")))
+               (:file "corsika-defbin")
+               (:file "corsika-reader")))

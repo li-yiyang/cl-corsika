@@ -663,3 +663,23 @@
 
 (defstruct event
   header datablocks long-blocks end)
+
+(defmethod print-object ((run run) stream)
+  (let ((run-number (floor (run-header-run-number (run-header run))))
+        (events     (length (run-events run)))
+        (date       (floor (run-header-start-date (run-header run)))))
+      (format stream "#RUN(~d, ~d events, ~d-~d-~d)"
+              run-number events
+              (floor date 10000)
+              (mod (floor date 100) 100)
+              (mod date 100))))
+
+(defmethod print-object ((event event) stream)
+  (let ((event-number (floor (event-header-event-number (event-header event))))
+        (particle-id  (floor (event-header-particle-id  (event-header event))))
+        (energy       (event-header-energy       (event-header event)))
+        (datasize     (length (event-datablocks event)))
+        (long         (length (event-long-blocks event))))
+      (format stream "#EVENT(~d, ~d, ~f GeV, ~d datablocks, ~d long-blocks)"
+              event-number particle-id energy
+              datasize long)))
