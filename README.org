@@ -24,6 +24,13 @@ enhance interface in lisp for Corsika or more simpler, just
 an automation scripts for my Corsika simulation works.
 
 * Progress
+** CL-CORSIKA
+The main package acts as a interface for lisp to work with
+Corsika. 
+
+*TODO MEMO*:
+
+
 ** CL-CORSIKA/BINARY
 Package =cl-corsika/binary= is for reading Corsika binary
 output file structure. 
@@ -56,3 +63,20 @@ have a simple try:
 + [DONE] +Double check =corsika-defbin.lisp=+
 + [DONE] +Add export functionality in =defbin.lisp=+
 + Easier alias names for slots reading
+
+*DEV MEMO*:
++ the =cl-corsika/binary= treat the file stream as
+  =(unsigned-byte 32)=
+  
+  (see =with-corsika-binary-output=)
++ each =(unsigned-byte 32)= will be map to =:float=, =:int=,
+  =:str= for basic data type and the complex type
+  =(:array TYPE SIZE)=, the reader function for each type is
+  stored in =*corsika-binary-readers*=
+  
+  (see =read-type=)
++ the binary structure is defined by =defbin=, which would
+  define a data structure
++ if changing the readed type, be sure to update =:export= in
+  =defpackage= too (this could be done by setting =:export= to
+  =t= in =defbin= and using =do-external-symbols=)
