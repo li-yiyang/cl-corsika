@@ -25,7 +25,8 @@ see `corsika-inputs.lisp' for detailed usage. "
                (otherwise "~a"))))
       `(defun ,name ,lambda-list
          ,docstring
-         (declare ,@formats)
+         ,@(if (eq (first formats) nil) nil
+               `((declare ,@formats)))
          (assert ,@(or asserts (list t)))
          (format *standard-output*
                  ;; ~&CORSIKA ~A ~D ~F ...

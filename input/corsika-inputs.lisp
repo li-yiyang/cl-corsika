@@ -162,7 +162,8 @@ The energies are total energies and include the particle rest mass.
 
 This keyword is not available in the STACKIN option.
 ")
-  (:formats (float slope)))
+  (:formats (float slope))
+  (:asserts t))
 
 ;; 4.8 Zenith Angle Definition
 
@@ -216,7 +217,7 @@ This keyword is only available in the VIEWCONE option.")
 
 ;; 4.11 Starting Grammage
 
-(def-input (starting-grammage "FIXCHI") (&optional (thick 0))
+(def-input (starting-grammage "FIXCHI") (&optional (thick 0.0))
   (:documentation "Starting Grammage.
 + `thick': The vertical starting altitude (in g/cm2 mass overburden) of the
   primary particle is set for all showers. This choice is not effective if the
@@ -257,7 +258,8 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
   in the CERENKOV and IACT options, but it may be overwritten using the keyword.
 
   Note that THICK0 is always defined as vertical depth even witht the SLANT option.")
-  (:format (boolean tmargin)))
+  (:formats (boolean by-atmosphere-entrance?))
+  (:asserts t))
 
 ;; 4.13 First Interaction Definition
 
@@ -321,7 +323,8 @@ Limits are: OBSLEV(1) ≤ HIMPACT(i) ≤ min( FIXHEI, FIXCHI, border of atmosphe
 
 This keyword is only available in the combination of the CURVED option with the
 UPWARD option.")
-  (:formats (float low high)))
+  (:formats (float low high))
+  (:asserts t))
 
 ;; 4.15 Stack Input File Name
 
@@ -469,7 +472,7 @@ To be used with ATMOD = 0 or 10.
 
 Limits are: CATMi > 0.")
   (:formats (float catm1 catm2 catm3 catm4 catm5))
-  (:assert  (and (> catm1 0) (> catm2 0) (> catm3 0)
+  (:asserts (and (> catm1 0) (> catm2 0) (> catm3 0)
                  (> catm4 0) (> catm5 0))))
 
 ;; 4.21 Atmospheric Layer Boundaries
@@ -484,8 +487,8 @@ values of MODATM = 1 are used for MODATM = 0 and 10. For other models (MODATM !=
 and != 10), the default values correspond with the selected model MODATM. Should
 only be used with ATMOD = 0 or 10. Limits are: 0. < HLAYi.")
   (:formats (float HLAY2 HLAY3 HLAY4 HLAY5))
-  (:assert  (and (> hlay1 0) (> hlay2 0) (> hlay3 0)
-                 (> hlay4 0) (> hlay5 0))))
+  (:asserts (every (lambda (hlayi) (> hlayi))
+                   (list HLAY2 HLAY3 HLAY4 HLAY5))))
 
 ;; 4.22 External Tabulated Atmosphere
 
@@ -616,7 +619,7 @@ This output cannot be redirected and always appears on unit 6.
 Limits are: 0 ≤ LEVLDB ≤ 8 .
 This keyword is only available in the DPMJET option.")
   (:formats (boolean FDPMJT) (integer LEVLDB))
-  (:asserts (<= 0 LEVLDE 8)))
+  (:asserts (<= 0 LEVLDB 8)))
 
 ;; 4.27 DPJSIG Selection Flag
 
@@ -1403,8 +1406,8 @@ ULIMIT see keyword ERANGE Sect. 4.6 page 71); 1 · 10^−4 ≤ WEITRAT ≤ 1 · 
 
 This keyword is only available in the MULTITHIN option.")
   (:formats (float EFRCTHN WMAX THINRAT WEITRAT))
-  (:asserts (<= 0.1 WMAX 1e20)
-            (<= 1e-4 WEITRAT 1e-6)))
+  (:asserts (and (<= 0.1 WMAX 1e20)
+                 (<= 1e-4 WEITRAT 1e-6))))
 
 ;; 4.59 Random Number Generator Initialization for MULTITHIN Modes
 
@@ -2356,7 +2359,7 @@ Limits are: 0 < R; 0 ≤ ID of telescope ≤ 999.
 
 This keyword is only available in the CERENKOV rsp. IACT option.")
   (:formats (float X Y Z R) (integer ID))
-  (:asserts (and (< R) (<= 0 ID <= 999))))
+  (:asserts (and (< R) (<= 0 ID 999))))
 
 ;; 4.96 Cherenkov Telescope Data File Name
 
@@ -2519,7 +2522,7 @@ The default value corresponds with the site of the MAGIC telescope.
 Limit is: -45. ≤ GEODECL ≤ +45. .
 
 This keyword is only available in the TRAJECT option.")
-  (:foramts (float GEODECL))
+  (:formats (float GEODECL))
   (:asserts (<= -45.0 GEODECL 45.0)))
 
 ;; 4.103 Trajectory Broadening Parameter
@@ -2693,7 +2696,7 @@ to capitals.")
 
 ;; 4.114 Debugging
 
-(def-input (debug "DEBUG") (DEBUG MDEBUG DEBDEL NDEBDL)
+(def-input (debugging "DEBUG") (DEBUG MDEBUG DEBDEL NDEBDL)
   (:documentation "Debugging.
 
 Format = (A5, L, I, L, I), Defaults = F, MONIOU, F, 100000
@@ -2874,7 +2877,7 @@ LK0S : If .true. the K◦s particles decay before gathering them in the
 interaction test.
 
 This keyword is only available in the INTTEST option.")
-  (:foramts (boolean LPI0 LETA LHYP LK0S))
+  (:formats (boolean LPI0 LETA LHYP LK0S))
   (:asserts t))
 
 ;; 4.123 Interaction Test Spectator Definition
@@ -3005,8 +3008,8 @@ hower.
 Limits are: X1 < X2, Y1 < Y2, Z1 < Z2 .
 
 This keyword is only available in the PLOTSH2 option.")
-  (:foramts (float X1 X2 Y1 Y2 Z1 Z2))
-  (:assserts (and (< X1 X2) (< Y1 Y2) (< Z1 Z2))))
+  (:formats (float X1 X2 Y1 Y2 Z1 Z2))
+  (:asserts (and (< X1 X2) (< Y1 Y2) (< Z1 Z2))))
 
 ;; 4.129 Plot Energy Cut Definition
 
@@ -3037,5 +3040,5 @@ This keyword is only available in the PLOTSH2 option.")
 (def-input (exit "EXIT") ()
   (:documentation "Format = (A4)
 This keyword ends the keyword input.")
-  (:formats t)
+  (:formats nil)
   (:asserts t))
