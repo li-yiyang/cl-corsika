@@ -58,11 +58,11 @@
 This number is used to form part of the name of the various output files.")
   (:formats (integer id))
   (:asserts (<= 0 id 999999))
-  (:after   (incf *run-id*)))
+  (:after   (setf *run-id* (1+ id))))
 
 ;; 4.2 First Event Number
 
-(def-input (event-number "EVTNR") (&optional (id 1))
+(def-input (first-event-number "EVTNR") (&optional (id 1))
   (:documentation "Event number of first shower.
 The second shower will get number SHOWNO+1 and so on.")
   (:formats (integer id))
@@ -73,7 +73,8 @@ The second shower will get number SHOWNO+1 and so on.")
 (defparameter *random-number-sequence-k* 1
   "The random number sequence k.")
 
-(def-input seed (&optional (seed1 *random-number-sequence-k*) (seed2 0) (seed3 0))
+(def-input (seed "SEED")
+    (&optional (seed1 *random-number-sequence-k*) (seed2 0) (seed3 0))
   (:documentation "Random Number Generator Initialization. 
 + `k' is the seed of the random number sequence k.
 + `seed1' contains the seed of the random number sequence k.
@@ -112,7 +113,10 @@ option, an external random generator may be used.")
 
 ;; 4.4 Number of Showers
 
-(def-input (showers "NSHOW") (&optional (counts 10))
+(defparameter *default-shower-number* 10
+  "The default number of showers to be generated in a run. ")
+
+(def-input (showers-number "NSHOW") (&optional (counts *default-shower-number*))
   (:documentation "Number of showers to be generated in a run.")
   (:formats (integer counts))
   (:asserts (>= counts 1)))
@@ -127,7 +131,7 @@ See Table 4 (page 123) for the particle codes.")
 
 ;; 4.6 Energy Range
 
-(def-input (energy "ERANGE") (&optional (low 1e4) (high low))
+(def-input (energy-range "ERANGE") (&optional (low 1e4) (high low))
   (:documentation "Energy range.
 + `low' : Lower limit of the primary particle energy range (in GeV);
 + `high': Upper limit of the primary particle energy range (in GeV).
@@ -217,7 +221,7 @@ This keyword is only available in the VIEWCONE option.")
 
 ;; 4.11 Starting Grammage
 
-(def-input (starting-grammage "FIXCHI") (&optional (thick 0.0))
+(def-input (starting-altitude "FIXCHI") (&optional (thick 0.0))
   (:documentation "Starting Grammage.
 + `thick': The vertical starting altitude (in g/cm2 mass overburden) of the
   primary particle is set for all showers. This choice is not effective if the
@@ -264,16 +268,16 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
 ;; 4.13 First Interaction Definition
 
 (def-input (first-interaction "FIXHEI")
-    (&optional (fixed-height 0.0) (target 0))
+    (&optional (height 0.0) (target 0))
   (:documentation "First Interaction Definition.
-+ `fixed-height': Fixes the height (in cm) of the first interaction of hadronic
++ `height': Fixes the height (in cm) of the first interaction of hadronic
   primaries (rsp. the starting altitude for em-particles) for all showers in
-  a run. If `fixed-height' = 0., the height of the first interaction is varied
+  a run. If `height' = 0., the height of the first interaction is varied
   at random according to the appropriate mean free path. In case of unstable
   hadronic primaries and fixed height the first interaction will not be a decay.
 
   The fixed height must be above the lowest observation level.
-  If `fixed-height' > 0. is set, the `starting-grammage' of the primary is not
+  If `height' > 0. is set, the `starting-grammage' of the primary is not
   effective (see Sect. 4.11 above) for the propagation but will define the
   starting point of the longitudinal profile unless the STACKIN and SLANT
   options are selected too. In that case, and only in that case,
@@ -302,8 +306,8 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
 
 Limits are: 0. ≤ FIXHEI < border of atmosphere (at 112.8E5 cm for atmospheric
 models 1 ≤ MODATM ≤ 9 or MODATM ≥ 17). ")
-  (:formats (float fixed-height) (integer target))
-  (:asserts (<= 0.0 fixed-height 112.8e5)))
+  (:formats (float height) (integer target))
+  (:asserts (<= 0.0 height 112.8e5)))
 
 ;; 4.14 Skimming Incidence
 

@@ -1,5 +1,25 @@
 (in-package :cl-corsika/input)
 
+;; The database of the CORSIKA input commands
+
+(defparameter *command-table* (make-hash-table :test 'equal)
+  "The Corsika input command table.
+
+Within the *command-table*:
++ KEY: the Corsika name of the command, for example \"RUNNR\";
++ VALUE: the cl-corsika/input infomation plist
+  + `:name': the cl-corsika/input command name
+  + `:args': the cl-corsika/input command arguments")
+
+(defun search-command (name)
+  "Find the Corsika Command by `name'.
+
+Example:
+
+    (search-command \"RUNNR\") ;; => (:NAME RUN-NUMBER :ARGS (ID))
+"
+  (gethash name *command-table* nil))
+
 ;; Defines the input
 
 (defmacro def-input (name lambda-list &rest options)
@@ -23,15 +43,22 @@ see `corsika-inputs.lisp' for detailed usage. "
                (float     "~f")
                (boolean   "~:[F~;T~]")
                (otherwise "~a"))))
-      `(defun ,name ,lambda-list
-         ,docstring
-         ,@(if (eq (first formats) nil) nil
-               `((declare ,@formats)))
-         (assert ,@(or asserts (list t)))
-         (format *standard-output*
-                 ;; ~&CORSIKA ~A ~D ~F ...
-                 ,(format nil "~~&~@:(~a~) ~{~a~^ ~}"
-                          corsika
-                          (mapcar #'typer args))
-                 ,@args)
-         ,@after))))
+      `(progn
+         ;; define the cl-corsika/input command function
+         (defun ,name ,lambda-list
+           ,docstring
+           ,@(if (eq (first formats) nil) nil
+                 `((declare ,@formats)))
+           (assert ,@(or asserts (list t)))
+           (format *standard-output*
+                   ;; ~&CORSIKA ~A ~D ~F ...
+                   ,(format nil "~~&~@:(~a~) ~{~a~^ ~}"
+                            corsika
+                            (mapcar #'typer args))
+                   ,@args)
+           ,@after)
+         ;; register the function in `*command-table*'
+         (setf (gethash ,corsika *command-table*)
+               '(:name ,name :args ,args))
+         ;; return the name of the corsika input
+         ',name))))
