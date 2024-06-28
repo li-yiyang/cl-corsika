@@ -18,3 +18,14 @@
                (:file "corsika-defbin")
                (:file "corsika-reader")
                (:file "higher-level")))
+
+(defsystem "cl-corsika/input"
+  :author ("凉凉")
+  :version "0.0"
+  :description "This is a package that generate Corsika input."
+  :depends-on ("alexandria")
+  :serial t
+  :pathname "input"
+  :components ((:file "package")
+               (:file "def-input")
+               (:file "corsika-inputs")))
