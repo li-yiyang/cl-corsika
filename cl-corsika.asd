@@ -28,4 +28,5 @@
   :pathname "input"
   :components ((:file "package")
                (:file "def-input")
-               (:file "corsika-inputs")))
+               (:file "corsika-inputs")
+               (:file "wrapper")))
