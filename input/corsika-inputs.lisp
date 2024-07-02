@@ -50,19 +50,15 @@
 
 ;; 4.1 Run Number
 
-(defparameter *run-id* 1
-  "Run number of this simulation. ")
-
-(def-input (run-number "RUNNR") (&optional (id *run-id*))
+(def-input (runnr "RUNNR") (&optional (id 1))
   (:documentation "Run number of this simulation.
 This number is used to form part of the name of the various output files.")
   (:formats (integer id))
-  (:asserts (<= 0 id 999999))
-  (:after   (setf *run-id* (1+ id))))
+  (:asserts (<= 0 id 999999)))
 
 ;; 4.2 First Event Number
 
-(def-input (first-event-number "EVTNR") (&optional (id 1))
+(def-input (evtnr "EVTNR") (&optional (id 1))
   (:documentation "Event number of first shower.
 The second shower will get number SHOWNO+1 and so on.")
   (:formats (integer id))
@@ -70,17 +66,19 @@ The second shower will get number SHOWNO+1 and so on.")
 
 ;; 4.3 Random Number Generator Initialization
 
-(defparameter *random-number-sequence-k* 1
-  "The random number sequence k.")
-
 (def-input (seed "SEED")
-    (&optional (seed1 *random-number-sequence-k*) (seed2 0) (seed3 0))
-  (:documentation "Random Number Generator Initialization. 
+    (&optional (seed1 1) (seed2 0) (seed3 0))
+  (:documentation "Random Number Generator Initialization.
+
+    SEED    ISEED(i,k),i=1... 3
+
+Format = (A4, 3I), Defaults = k, 0, 0
 + `k' is the seed of the random number sequence k.
 + `seed1' contains the seed of the random number sequence k.
 + `seed2' and `seed3' contain the number of calls N_{in} to the generator
   that are performed for initialization such that
-  N_{in} = ISEED(2, k) + 109*ISEED(3, k).
+
+      N_{in} = ISEED(2, k) + 10^9 * ISEED(3, k)
 
 At present at most k = 7 sequences are used:
 + 1 for the hadron shower;
@@ -108,22 +106,18 @@ it is sufficient to modify ISEED(1, k).
 When the eventio and other separate functions are enabled in the IACT
 option, an external random generator may be used.")
   (:formats (integer seed1 seed2 seed3))
-  (:asserts (<= 1 *random-number-sequence-k* 900000000))
-  (:after   (incf *random-number-sequence-k*)))
+  (:asserts (<= 1 seed1 900000000)))
 
 ;; 4.4 Number of Showers
 
-(defparameter *default-shower-number* 10
-  "The default number of showers to be generated in a run. ")
-
-(def-input (showers-number "NSHOW") (&optional (counts *default-shower-number*))
+(def-input (nshow "NSHOW") (&optional (counts 10))
   (:documentation "Number of showers to be generated in a run.")
   (:formats (integer counts))
   (:asserts (>= counts 1)))
 
 ;; 4.5 Primary Particle Definition
 
-(def-input (primary-particle "PRMPAR") (&optional (particle-id 14))
+(def-input (prmpar "PRMPAR") (&optional (particle-id 14))
   (:documentation "Particle type of the primary particle.
 See Table 4 (page 123) for the particle codes.")
   (:formats (integer particle-id))
@@ -131,7 +125,7 @@ See Table 4 (page 123) for the particle codes.")
 
 ;; 4.6 Energy Range
 
-(def-input (energy-range "ERANGE") (&optional (low 1e4) (high low))
+(def-input (erange "ERANGE") (&optional (low 1e4) (high low))
   (:documentation "Energy range.
 + `low' : Lower limit of the primary particle energy range (in GeV);
 + `high': Upper limit of the primary particle energy range (in GeV).
@@ -155,7 +149,7 @@ This keyword is not available in the STACKIN option.")
 
 ;; 4.7 Slope of Energy Spectrum
 
-(def-input (energy-spectrum-slope "ESLOPE") (&optional (slope 0.0))
+(def-input (eslope "ESLOPE") (&optional (slope 0.0))
   (:documentation "Exponent γ of differential primary energy spectrum.
 The primary energy is taken at random from an exponential energy spectrum
 of the form dN/dE0 ∝ E0^γ.
@@ -171,7 +165,7 @@ This keyword is not available in the STACKIN option.
 
 ;; 4.8 Zenith Angle Definition
 
-(def-input (theta-range "THETAP") (&optional (low 0.0) (high low))
+(def-input (thetap "THETAP") (&optional (low 0.0) (high low))
   (:documentation "Zenith Angle Definition of theta. 
 + `low' : Low edge of zenith angle range of primary particle (in degree);
 + `high': High edge of zenith angle range of primary particle (in degree).
@@ -187,7 +181,7 @@ If THETPR(1) = THETPR(2), the zenith angle is fixed at this value.")
 
 ;; 4.9 Azimuth Angle Definition
 
-(def-input (phi-range "PHIP") (&optional (low 0.0) (high low))
+(def-input (phip "PHIP") (&optional (low 0.0) (high low))
   (:documentation "Azimuth Angle Definition.
 + `low' : Low edge of azimuth angle range of primary particle (in degree);
 + `high': High edge of azimuth angle range of primary particle (in degree).
@@ -221,7 +215,7 @@ This keyword is only available in the VIEWCONE option.")
 
 ;; 4.11 Starting Grammage
 
-(def-input (starting-altitude "FIXCHI") (&optional (thick 0.0))
+(def-input (fixchi "FIXCHI") (&optional (thick 0.0))
   (:documentation "Starting Grammage.
 + `thick': The vertical starting altitude (in g/cm2 mass overburden) of the
   primary particle is set for all showers. This choice is not effective if the
@@ -238,7 +232,7 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
 
 ;; 4.12 Starting Point of Arrival Timing
 
-(def-input (time-by-atmosphere-entrance "TSTART")
+(def-input (tstart "TSTART")
     (&optional (by-atmosphere-entrance? nil))
   (:documentation "Starting Point of Arrival Timing
 + `by-atmosphere-entrance?': Flag indicating the starting point of the
@@ -267,7 +261,7 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
 
 ;; 4.13 First Interaction Definition
 
-(def-input (first-interaction "FIXHEI")
+(def-input (fixhei "FIXHEI")
     (&optional (height 0.0) (target 0))
   (:documentation "First Interaction Definition.
 + `height': Fixes the height (in cm) of the first interaction of hadronic
@@ -277,12 +271,11 @@ This keyword is not available in the COASTUSERLIB or STACKIN option.")
   hadronic primaries and fixed height the first interaction will not be a decay.
 
   The fixed height must be above the lowest observation level.
-  If `height' > 0. is set, the `starting-grammage' of the primary is not
+  If `height' > 0. is set, the `fixhei' of the primary is not
   effective (see Sect. 4.11 above) for the propagation but will define the
   starting point of the longitudinal profile unless the STACKIN and SLANT
   options are selected too. In that case, and only in that case,
-  `first-interaction' also define the starting point of the shower
-  profile in slant depth.
+  `fixhei' also define the starting point of the shower profile in slant depth.
 
   In the STACKIN option FIXHEI is needed to specify the altitude of the first,
   externally treated interaction.
@@ -311,7 +304,7 @@ models 1 ≤ MODATM ≤ 9 or MODATM ≥ 17). ")
 
 ;; 4.14 Skimming Incidence
 
-(def-input (horizontal-shower-min-altitude "IMPACT")
+(def-input (impact "IMPACT")
     (&optional (low 0.0) (high low))
   (:documentation "Skimming Incidence.
 + `low' : Lower value (in cm) for minimum altitude of horizontal shower axis;
@@ -332,7 +325,7 @@ UPWARD option.")
 
 ;; 4.15 Stack Input File Name
 
-(def-input (stack-input "INFILE") (file-name)
+(def-input (infile "INFILE") (file-name)
   (:documentation "Stack Input File Name.
 + `file-name': File name to define the name and directory of the input file
   containing the parameters of secondary particles (see Sect. 3.5.34 page 61).
@@ -350,7 +343,7 @@ This keyword is only available in the STACKIN option.")
 
 ;; 4.16 Stack Output File Name
 
-(def-input (stack-output "OUTFILE") (file-name)
+(def-input (outfile "OUTFILE") (file-name)
   (:documentation "Stack Output File Name.
 + `file-name': File name to define the name and directory of the output file
   which will contain the parameters of the secondary particles produced in
@@ -375,7 +368,7 @@ This keyword is not available in the CONEX or STACKIN options.")
 
 ;; 4.17 Atmospheric Model Selection
 
-(def-input (atmosphere-model "ATMOD") (&optional (model-id 1))
+(def-input (atmod "ATMOD") (&optional (model-id 1))
   (:documentation "Atmosphere Model Selection. 
 + `model-id': Gives the number of the atmospheric parameterization.
 
@@ -481,7 +474,7 @@ Limits are: CATMi > 0.")
 
 ;; 4.21 Atmospheric Layer Boundaries
 
-(def-input (atm-layer-boundaries "ATMLAY")
+(def-input (atmlay "ATMLAY")
     (HLAY2 HLAY3 HLAY4 HLAY5)
   (:documentation "Atmospheric Layer Boundaries. 
 Format = (A6, 4F), Defaults = 4.D5, 10.D5, 40.D5, 100.D5
@@ -666,7 +659,7 @@ This keyword is only available in the EPOS option.")
 
 ;; 4.29 EPOS Parameters
 
-(def-input (epos-param "EPOPAR") (&optional (parcha " "))
+(def-input (epopar "EPOPAR") (&optional (parcha " "))
   (:documentation "EPOS Parameters.
 
 Format = (A6, A74), Defaults = ’ ’
