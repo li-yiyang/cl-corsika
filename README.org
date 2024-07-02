@@ -5,6 +5,16 @@
 *functionalities or contribute to the repo*
 
 * About
+#+begin_example
+     OOO  O            OOO    OOO   OOOO    OOO  OOO O    O   O         
+    O   O O           O   O  O   O  O   O  O   O  O  O   O   O O        |
+   O      O          O      O     O O    O O      O  O  O   O   O   ----|----  
+   O      O     OOOO O      O     O O   O   OOO   O  OOO    O   O       *
+   O      O          O      O     O OOOO       O  O  O  O   OOOOO      /|\
+    O   O O           O   O  O   O  O   O  O   O  O  O   O  O   O     /\|/\
+     OOO  OOOOO        OOO    OOO   O    O  OOO  OOO O    O O   O   =========
+#+end_example
+
 Ah, I was doing my Corsika simulation work while I happend
 to found that COAST does not compile on my poor machine,
 which brings me trouble while reading Corsika binary output
@@ -29,14 +39,64 @@ The main package acts as a interface for lisp to work with
 Corsika. 
 
 *TODO MEMO*:
++ cl-corsika/analyze (analyze functionalities? )
++ cl-corsika/plot (output with gurafu? or cl-webview? )
 
+** CL-CORSIKA/INPUT
+Package =cl-corsika/input= is for generate Corsika input file
+for simulation. 
+
+Currently it's WIP.
+You could just load it to have a simple try:
+
+#+begin_src lisp
+  (ql:quickload :cl-corsika/input)
+
+  (uiop:with-current-directory ("PATH/TO/CORSIKA/RUN/")
+    (uiop:run-program
+     "./corsikacorsika77500XXX_XXX"
+     :input (cl-corsika/input:with-corsika-input (:stream :debug t)
+              
+              ;;; Set the physics (the keywords are ignorable)
+              
+              ;; Fe (5626) with 1e5 GeV primary particle
+              (cl-corsika/input:setup-primary-particle 5626 1e5)
+              ;; setup first interaction infomation
+              (cl-corsika/input:setup-first-interaction :target :Nitrogen)
+              ;; setup the interaction model
+              (cl-corsika/input:setup-model :EPOS :GHEISHA
+                                            :muon-scattering :gauss
+                                            :scatter-step 1.0
+                                            ;; if you want more ...
+                                            )
+              ;; setup the observation pane
+              (cl-corsika/input:setup-observation-pane :altitude 0.0
+                                                       :atmosphere :default)
+              
+              ;;; Set utils
+              (cl-corsika/input:setup-utils :dir "OUTPUT/PATH"
+                                            :debug t
+                                            :user "CL-CORSIKA")
+              ;; or, you could use the low level methods
+              ;; like (cl-corsika/input::runnr id)
+              )
+     :output t))
+#+end_src
+
+*TODO*:
++ expose lowlevel method in different package (?)
++ task manager and resource load monitor (GUI?)
++ easier interface
+
+*DEV MEMO*:
++ =with-corsika-input= output to =*standard-output*= (using closure to redirect)
++ =with-corsika-input= output =cl-corsika/input::exit= by the end
 
 ** CL-CORSIKA/BINARY
 Package =cl-corsika/binary= is for reading Corsika binary
 output file structure. 
 
-Currently it's work in progress. You could just load it to
-have a simple try:
+You could just load it to have a simple try:
 
 #+begin_src lisp
   ;; Make sure cl-corsika is under quicklisp load path
@@ -63,6 +123,7 @@ have a simple try:
 + [DONE] +Double check =corsika-defbin.lisp=+
 + [DONE] +Add export functionality in =defbin.lisp=+
 + Easier alias names for slots reading
++ Speed improvment
 
 *DEV MEMO*:
 + the =cl-corsika/binary= treat the file stream as
@@ -80,3 +141,5 @@ have a simple try:
 + if changing the readed type, be sure to update =:export= in
   =defpackage= too (this could be done by setting =:export= to
   =t= in =defbin= and using =do-external-symbols=)
+
+
