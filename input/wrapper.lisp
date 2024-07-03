@@ -104,14 +104,59 @@ See: `cl-corsika/input::fixhei', `cl-corsika/input::fixchi'. "
 ;; 3 Program Options
 
 (defparameter *corsika-source-path*
-  (uiop:ensure-directory-pathname
-   (or (uiop:getenv "CORSIKA_PATH") "corsika-77500"))
+  (truename (uiop:ensure-directory-pathname
+             (or (uiop:getenv "CORSIKA_PATH") "corsika-77500")))
   "Where the Corsika source directory is placed.
+
+By default, it is set by the %CORSIKA_PATH environment variable,
+if not found or if not existing, will raise error. Use
+`set-corsika-source-path' to set the path
 
 Example:
 
     \"/Users/ryo/corsika-77500/\"
 ")
+
+(defparameter *max-corsika-path-search-depth* 3
+  "The max path search depth for Corsika source path. ")
+
+(defun search-corsika-path (search-name
+                            &optional
+                              (root (uiop/common-lisp:user-homedir-pathname))
+                              (depth *max-corsika-path-search-depth*))
+  "Search Corsika source path with `search-name' starting from `root'.
+Return `nil' if not found, or the path if founded.
+
+Using DFS searching with max depth of `*max-corsika-path-search-depth*'.
+Note: directory starting with `.' will be ignored. "
+  (let* ((root (uiop:ensure-directory-pathname root))
+         (corsika (uiop:ensure-directory-pathname
+                   (uiop:subpathname root search-name))))
+    (cond ((uiop:directory-exists-p corsika) corsika)
+          ((> depth 0)
+           (loop for path in (remove-if #'uiop:hidden-pathname-p
+                                        (uiop:subdirectories root))
+                 for search = (search-corsika-path search-name path (1- depth))
+                 if search
+                   return search))
+          (t nil))))
+
+(defun set-corsika-source-path
+    (&optional (dir (or (uiop:getenv "CORSIKA_PATH") "corsika-77500")))
+  "Set Corsika source path. "
+  (let ((dir (uiop:ensure-directory-pathname dir)))
+    (restart-case
+        (if (uiop:directory-exists-p dir)
+            (setf *corsika-source-path* (truename dir))
+            (error (format nil "Path ~A not exist. " dir)))
+      (use-value (fix-path)
+        :report "Reset the Corsika source path. "
+        :interactive (lambda () (list (read)))
+        (set-corsika-source-path fix-path))
+      (search-root (corsika-name)
+        :report "Search the Corsika path with given name under home dir. "
+        :interactive (lambda () (list (read)))
+        (set-corsika-source-path (search-corsika-path corsika-name))))))
 
 ;; 3.1 High-Energy Hadronic Interaction Models
 ;; 3.1.1 DPMJET Option
@@ -486,8 +531,6 @@ Example:
       (setup-observation-pane :altitude 0.0)
       (setup-utils :dir *output-dir*))
 "
-  `(%with-corsika-input ,output
-                        (,(if debug 'print 'progn)
-                         (with-output-to-string (*standard-output*)
-                           ,@body
-                           (exit)))))
+  `(let ((corsika-input (with-output-to-string (*standard-output*) ,@body (exit))))
+     (when ,debug (format t "~A" corsika-input) (force-output))
+     (%with-corsika-input ,output corsika-input)))

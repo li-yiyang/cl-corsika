@@ -21,7 +21,7 @@
 
 (defsystem "cl-corsika/input"
   :author ("凉凉")
-  :version "0.0"
+  :version "0.1"
   :description "This is a package that generate Corsika input."
   :depends-on ("alexandria")
   :serial t

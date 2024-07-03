@@ -3,6 +3,9 @@
   (:import-from :alexandria :parse-ordinary-lambda-list)
   (:export
    #:search-command
+   #:set-corsika-source-path
+   #:*max-corsika-path-search-depth*
+   #:search-corsika-path
    #:*corsika-source-path*
    #:with-corsika-input
    #:setup-primary-particle
