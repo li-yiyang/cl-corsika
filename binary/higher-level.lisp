@@ -16,6 +16,28 @@
               (mod (floor date 100) 100)
               (mod date 100))))
 
+(defmethod print-object ((run-header run-header) stream)
+  (let* ((run-number (truncate (run-header-run-number run-header)))
+         (observation-level-info (run-header-observation-level-info run-header))
+         (observation-panes (subseq (observation-info-heights observation-level-info) 0
+                                    (truncate (observation-info-number observation-level-info))))
+         (energy-spectrum (run-header-energy-spectrum run-header))
+         (energy-cutoff   (run-header-energy-cutoff   run-header)))
+    (format stream "#RUN-HEADER(#~d, obs.lev. [~{~f~^, ~}], E [~f, ~f, ~f], [had. ~f, mu ~f, em. ~f, γ ~f])"
+            run-number
+            (map 'list #'identity observation-panes)
+            (energy-spectrum-lower-limit energy-spectrum)
+            (energy-spectrum-upper-limit energy-spectrum)
+            (energy-spectrum-slope       energy-spectrum)
+            (energy-cutoff-hadron        energy-cutoff)
+            (energy-cutoff-muon          energy-cutoff)
+            (energy-cutoff-electron      energy-cutoff)
+            (energy-cutoff-photon        energy-cutoff))))
+
+(defmethod print-object ((run-end run-end) stream)
+  (let* ((run-number (truncate (run-end-run-number run-end))))
+    (format stream "#RUN-END(#~d)" run-number)))
+
 (defmethod print-object ((event event) stream)
   (let ((event-number (floor (event-header-event-number (event-header event))))
         (particle-id  (floor (event-header-particle-id  (event-header event))))
@@ -25,6 +47,18 @@
       (format stream "#EVENT(~d, ~d, ~f GeV, ~d datablocks, ~d long-blocks)"
               event-number particle-id energy
               datasize long)))
+
+(defmethod print-object ((event-header event-header) stream)
+  (let* ((p (event-header-momentum     event-header)))
+    (format stream "#EVENT-HEADER(#~d, pid ~d, ~f GeV, [~f, ~f, ~f] GeV/c)"
+            (truncate (event-header-event-number event-header))
+            (truncate (event-header-particle-id  event-header))
+            (event-header-energy       event-header)
+            (momentum-x p) (momentum-y p) (momentum-z p))))
+
+(defmethod print-object ((event-end event-end) stream)
+  (format stream "#EVENT-HEADER(#~d)"
+          (truncate (event-end-event-number event-end))))
 
 (defmethod print-object ((particle particle) stream)
   (let* ((id (particle-description particle))
@@ -38,6 +72,11 @@
     (format stream "#PARTICLE(~d, (~f, ~f) cm, (~f, ~f, ~f) GeV/c, ~f nsec)"
             (truncate id) x y px py pz dt)))
 
+(defmethod print-object ((data-block particle-data-sub-block) stream)
+  (format stream "#PARTICLE-DATA-SUB-BLOCK(~d particles)"
+          (count-if (lambda (particle) (not (zerop (particle-description particle))))
+                    (particle-data-sub-block-particles data-block))))
+
 ;; High Level Interface
 
 (defun map-over-event (fn corsika)
@@ -50,4 +89,8 @@
     ;; for EVENT list (possibly), map over list
     (list  (mapcar fn corsika))))
 
-
+;; (defun iter-over-particles (fn event)
+;;   "Iter over corsika particle data with function `fn' on `event'. "
+;;   (etypecase corsika
+;;     (event )
+;;     ))

@@ -256,8 +256,11 @@ See: `cl-corsika/input::epos', `cl-corsika/input::epopar'. "
                       (use-NKG            t)
                       (NKG-outer-radius   200e2)
                       (use-EGS4           t)
-                      ;; longitudinal simulation
-                      (longitudinal '(t 10.0 nil nil))
+                      ;; longitudinal development infomation
+                      (longitudinal-info  nil)
+                      (longitudinal-step  20.0)
+                      (longitudinal-fit   nil)
+                      (longitudinal-out   nil)
                     &allow-other-keys)
   "Set the hadronic and eletronic model parameters.
 
@@ -332,7 +335,11 @@ Keywords:
   ;; for NKG
   (radnkg NKG-outer-radius)
 
-  (apply #'longi longitudinal))
+  ;; setup longitudinal infomation
+  (longi (if longitudinal-info t nil)
+         (float longitudinal-step)
+         (if longitudinal-fit  t nil)
+         (if longitudinal-out  t nil)))
 
 ;; ========== Set Observation Pane (Geo, Mag, ATM) ==========
 
