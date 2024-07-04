@@ -6,11 +6,21 @@
   :serial t
   :components ((:file "package")))
 
+(defsystem "cl-corsika/physics"
+  :author ("凉凉")
+  :version "0.0"
+  :description "This is a package that deal with Corsika physics part. "
+  :depends-on ()
+  :serial t
+  :pathname "physics"
+  :components ((:file "package")
+               (:file "particles")))
+
 (defsystem "cl-corsika/binary"
   :author ("凉凉")
   :version "0.1"
   :description "This is a package that read Corsika output."
-  :depends-on ("alexandria" "ieee-floats")
+  :depends-on ("alexandria" "ieee-floats" "cl-corsika/physics")
   :serial t
   :pathname "binary"
   :components ((:file "package")

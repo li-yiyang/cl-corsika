@@ -41,6 +41,15 @@ Corsika.
 *TODO MEMO*:
 + cl-corsika/analyze (analyze functionalities? )
 + cl-corsika/plot (output with gurafu? or cl-webview? )
++ cl-corsika/physics physics constants, particle id, physics
+  formulas, and so on
++ cl-corsika/miscs
+
+** CL-CORSIKA/PHYSICS
+Package =cl-corsika/physics= is for the *physics* part in Corsika,
+which includes:
++ particle id maps from name to corssponding id number in different
+  parts (in =particle-id.lisp=);
 
 ** CL-CORSIKA/INPUT
 Package =cl-corsika/input= is for generate Corsika input file
