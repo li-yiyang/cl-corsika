@@ -1,5 +1,5 @@
 (defpackage #:cl-corsika/binary
-  (:use :cl)
+  (:use :cl :cl-corsika/physics)
   (:import-from #:ieee-floats
                 #:decode-float32)
   (:import-from #:alexandria

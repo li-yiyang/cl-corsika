@@ -40,7 +40,8 @@
 
 (defmethod print-object ((event event) stream)
   (let ((event-number (floor (event-header-event-number (event-header event))))
-        (particle-id  (floor (event-header-particle-id  (event-header event))))
+        (particle-id  (corsika-particle-name
+                       (event-header-particle-id  (event-header event))))
         (energy       (event-header-energy       (event-header event)))
         (datasize     (length (event-datablocks event)))
         (long         (length (event-long-blocks event))))
@@ -52,7 +53,8 @@
   (let* ((p (event-header-momentum     event-header)))
     (format stream "#EVENT-HEADER(#~d, pid ~d, ~f GeV, [~f, ~f, ~f] GeV/c)"
             (truncate (event-header-event-number event-header))
-            (truncate (event-header-particle-id  event-header))
+            (corsika-particle-name
+             (event-header-particle-id  event-header))
             (event-header-energy       event-header)
             (momentum-x p) (momentum-y p) (momentum-z p))))
 
@@ -60,17 +62,33 @@
   (format stream "#EVENT-HEADER(#~d)"
           (truncate (event-end-event-number event-end))))
 
+(defun %parse-particle-description (desc)
+  "Return particle-id hadr. generation and no. of obs. level. "
+  (let* ((desc            (truncate desc))
+         (particle-id     (floor desc 1000))
+         (hadr-generation (mod (floor desc 10) 100))
+         (obs-level       (mod desc 10)))
+    (if (or (= particle-id 95)
+            (= particle-id 96))
+        (values particle-id (+ (* hadr-generation 10) obs-level))
+        (values particle-id hadr-generation obs-level))))
+
 (defmethod print-object ((particle particle) stream)
-  (let* ((id (particle-description particle))
-         (x  (particle-x           particle))
-         (y  (particle-y           particle))
-         (p  (particle-momentum    particle))
-         (px (momentum-x           p))
-         (py (momentum-y           p))
-         (pz (momentum-z           p))
-         (dt (particle-time        particle)))
-    (format stream "#PARTICLE(~d, (~f, ~f) cm, (~f, ~f, ~f) GeV/c, ~f nsec)"
-            (truncate id) x y px py pz dt)))
+  (let* ((desc (particle-description particle))
+         (x    (particle-x           particle))
+         (y    (particle-y           particle))
+         (p    (particle-momentum    particle))
+         (px   (momentum-x           p))
+         (py   (momentum-y           p))
+         (pz   (momentum-z           p))
+         (dt   (particle-time        particle)))
+    (multiple-value-bind (pid hadr obs-level)
+        (%parse-particle-description desc)
+      (format stream "#PARTICLE(~a, hadr.g ~d, (~,2f, ~,2f) m, (~f, ~f, ~f) GeV/c, ~f ns, #~d)"
+              (corsika-particle-name pid) hadr
+              (/ x 100) (/ y 100)
+              px py pz dt
+              obs-level))))
 
 (defmethod print-object ((data-block particle-data-sub-block) stream)
   (format stream "#PARTICLE-DATA-SUB-BLOCK(~d particles)"
@@ -89,8 +107,21 @@
     ;; for EVENT list (possibly), map over list
     (list  (mapcar fn corsika))))
 
-;; (defun iter-over-particles (fn event)
-;;   "Iter over corsika particle data with function `fn' on `event'. "
-;;   (etypecase corsika
-;;     (event )
-;;     ))
+(defun particle? (particle)
+  "Test if `particle' is a valid particle. "
+  (and (typep particle 'particle)
+       (not (zerop (particle-description particle)))))
+
+(defun iter-over-particles (fn event)
+  "Iter over corsika particle data with function `fn' on `event'. "
+  (etypecase event
+    (event
+     (loop for data-block in (event-datablocks event)
+           for particles = (particle-data-sub-block-particles data-block)
+           do (dotimes (i 39)
+                (let ((particle (aref particles i)))
+                  (when (particle? particle)
+                    (funcall fn particle))))))
+    (run
+     (loop for evt in (run-events event) do
+       (iter-over-particles fn evt)))))

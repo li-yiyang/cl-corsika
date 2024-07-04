@@ -488,6 +488,7 @@ Keywords:
 + `dir': output directory, default to current working directory;
 + `user': if $USER is not found, using `CL-CORSIKA' instead;
 "
+  (declare (ignorable debug))
   (runnr  run-id)
   (evtnr  start-event)
   
@@ -498,7 +499,7 @@ Keywords:
   (datbas data-base)
   
   ;; setup debug info
-  (when debug (apply #'setup-debug args))
+  (apply #'setup-debug args)
   
   (maxprt print-event)
   (direct (format nil "~A" (truename (uiop:ensure-directory-pathname dir))))
