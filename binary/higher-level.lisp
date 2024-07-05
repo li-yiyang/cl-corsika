@@ -97,15 +97,17 @@
 
 ;; High Level Interface
 
-(defun map-over-event (fn corsika)
+(defun iter-over-event (fn corsika)
   "Map over corsika event with function `fn' on `corsika'. "
   (etypecase corsika
     ;; for RUN class, map over events
-    (run   (mapcar fn (run-events corsika)))
+    (run   (dolist (event (run-events corsika))
+             (funcall fn corsika)))
     ;; for EVENT class, funcall `fn' on corsika
-    (event (list (funcall fn corsika)))
+    (event (funcall fn corsika))
     ;; for EVENT list (possibly), map over list
-    (list  (mapcar fn corsika))))
+    (list  (dolist (event (run-events corsika))
+             (funcall fn corsika)))))
 
 (defun particle? (particle)
   "Test if `particle' is a valid particle. "

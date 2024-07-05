@@ -1,4 +1,4 @@
-(in-package :cl-corsika/binary)
+(in-package :cl-corsika/binary.lowlevel)
 
 ;;; Documentation:
 ;; This part defines `defbin' macro for easily define Corsika output

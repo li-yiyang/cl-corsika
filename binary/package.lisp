@@ -1,20 +1,10 @@
-(defpackage #:cl-corsika/binary
-  (:use :cl :cl-corsika/physics)
-  (:import-from #:ieee-floats
-                #:decode-float32)
-  (:import-from #:alexandria
-                #:make-keyword
-                #:with-gensyms)
-  (:documentation "This package reads Corsika binary outputs.")
+(defpackage #:cl-corsika/binary.lowlevel
+  (:use :cl)
+  (:import-from #:ieee-floats #:decode-float32)
+  (:import-from #:alexandria #:make-keyword #:with-gensyms)
+  (:documentation "Lowlevel definition of Corsika binary output file. ")
   (:export
-   ;; Corsika Binary Interfaces
-   ;; These functions/macros are recommanded to use
-   #:with-open-corsika
-   
-   ;; Corsika Binary readers
-   ;; Note that it's recommand not to use them directly...
-   
-   ;; data structure
+   ;; higher data structure
    #:run
    #:run-header
    #:run-events
@@ -24,8 +14,11 @@
    #:event-datablocks
    #:event-long-blocks
    #:event-end
-
+   
    ;; exported by `defbin'
+   
+   ;; Corsika Binary
+   ;; Note that it's recommand not to use them directly...
    #:cherenkov-cal-info
    #:cherenkov-cal-info-bunch-size
    #:cherenkov-cal-info-detector-number-x
@@ -296,6 +289,31 @@
    #:shower-statistics-weighted-muon-number
    #:shower-statistics-weighted-particle-number
    #:shower-statistics-weighted-photon-number
+   ))
+
+(defpackage #:cl-corsika/binary
+  (:use :cl :cl-corsika/physics :cl-corsika/binary.lowlevel)
+  (:import-from #:ieee-floats
+                #:decode-float32)
+  (:import-from #:alexandria
+                #:make-keyword
+                #:with-gensyms)
+  (:documentation "This package reads Corsika binary outputs.")
+  (:export
+   ;; Corsika Binary Interfaces
+   ;; These functions/macros are recommanded to use
+   #:with-open-corsika
+   
+   ;; data structure
+   #:run
+   #:run-header
+   #:run-events
+   #:run-end
+   #:event
+   #:event-header
+   #:event-datablocks
+   #:event-long-blocks
+   #:event-end
    ))
 
 (in-package :cl-corsika/binary)
