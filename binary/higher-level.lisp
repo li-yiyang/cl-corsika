@@ -106,7 +106,7 @@
     ;; for EVENT class, funcall `fn' on corsika
     (event (funcall fn corsika))
     ;; for EVENT list (possibly), map over list
-    (list  (dolist (event (run-events corsika))
+    (list  (dolist (event corsika)
              (funcall fn corsika)))))
 
 (defun particle? (particle)

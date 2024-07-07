@@ -14,9 +14,13 @@
    #:event-datablocks
    #:event-long-blocks
    #:event-end
+   #:make-run
+   #:make-event
    
+
    ;; exported by `defbin'
-   
+   #:read-type
+
    ;; Corsika Binary
    ;; Note that it's recommand not to use them directly...
    #:cherenkov-cal-info
@@ -303,7 +307,12 @@
    ;; Corsika Binary Interfaces
    ;; These functions/macros are recommanded to use
    #:with-open-corsika
-   
+
+   ;; Higher Level interface
+   #:particle?
+   #:iter-over-event
+   #:iter-over-particles
+
    ;; data structure
    #:run
    #:run-header

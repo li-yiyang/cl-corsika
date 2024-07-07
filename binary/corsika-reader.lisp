@@ -84,6 +84,6 @@
 (defmacro with-open-corsika ((corsika filespec) &body body)
   "With corsika run structure as `corsika' from `filespec'."
   (with-gensyms (fstream)
-    `(with-corsika-binary-output (,fstream ,filespec)
+    `(with-open-file (,fstream ,filespec :element-type '(unsigned-byte 32))
        (let ((,corsika (read-corsika ,fstream)))
          ,@body))))
