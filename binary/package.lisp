@@ -16,7 +16,7 @@
    #:event-end
    #:make-run
    #:make-event
-   
+
 
    ;; exported by `defbin'
    #:read-type
@@ -312,6 +312,7 @@
    #:particle?
    #:iter-over-event
    #:iter-over-particles
+   #:with-particles
 
    ;; data structure
    #:run

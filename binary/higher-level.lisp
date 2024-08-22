@@ -127,3 +127,60 @@
     (run
      (loop for evt in (run-events event) do
        (iter-over-particles fn evt)))))
+
+(defmacro with-particles (corsika (particle
+				   &key
+				     (hadr-gen  'hadr-gen   hadr-gen?)
+				     (obs-level 'obs-level  obs-level?)
+				     (momentum  '(px py pz) momentum?)
+				     (position  '(x y)      position?)
+				     (time      'time      time?))
+			  &body body)
+  "A wrapper over `iter-over-particles'.
+
+Iter over particles in `corsika' with bindings:
++ `particle' will be the name of the particle
+  (see `cl-corsika/physics:corsika-particle-name');
++ `hadr-gen' will be variable name bind with hadr. generation;
++ `momentum' will be variables bind with momentum x and momentum y;
++ `position' will be variables bind with position x and y;
++ `time' will be the arriving time;
+
+Example:
+
+    (with-particles corsika
+        (particle :momentum (px py) :position (x y))
+      ;; do something
+    )
+"
+  (with-gensyms (raw-particle particle-id)
+    (let* ((body (if time?
+		     `((let ((,time (particle-time ,raw-particle)))
+			 ,@body))
+		     body))
+	   (body `((let ((,particle (corsika-particle-name ,particle-id)))
+		     (declare (ignorable ,particle))
+		     ,@body)))
+	   (body (if position?
+		     `((destructuring-bind ,position
+			   (list (particle-x ,raw-particle)
+				 (particle-y ,raw-particle))
+			 ,@body))
+		     `body))
+	   (body (if momentum?
+		     `((destructuring-bind ,momentum
+			   (list (momentum-x (particle-momentum ,raw-particle))
+				 (momentum-y (particle-momentum ,raw-particle))
+				 (momentum-z (particle-momentum ,raw-particle)))
+			 ,@body))
+		     body))
+	   (body (if hadr-gen? body
+		     (cons `(declare (ignore ,hadr-gen)) body)))
+	   (body (if obs-level? body
+		     (cons `(declare (ignore ,obs-level)) body))))
+      `(iter-over-particles
+	(lambda (,raw-particle)
+	  (multiple-value-bind (,particle-id ,hadr-gen ,obs-level)
+	      (%parse-particle-description (particle-description ,raw-particle))
+	    ,@body))
+	,corsika))))

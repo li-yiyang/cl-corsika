@@ -14,7 +14,8 @@
   :serial t
   :pathname "physics"
   :components ((:file "package")
-               (:file "particles")))
+               (:file "particles")
+	       (:file "utils")))
 
 (defsystem "cl-corsika/binary"
   :author ("凉凉")
