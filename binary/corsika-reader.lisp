@@ -16,6 +16,7 @@
   "The size of Corsika block. (WITHOUT THIN). ")
 
 (let ((block-counter 0))
+  (declare (special block-counter))
   (defun %read-sub-block (fstream)
     "Read and return sub-block from `fstream'. "
     (flet ((block-size-check ()
@@ -49,7 +50,7 @@
                (let ((sub-block (read-type type fstream)))
                  (incf block-counter)
                  (values sub-block block-counter)))))))
-  
+
   (defun %reset-block-counter ()
     (setf block-counter 0)))
 
@@ -78,8 +79,9 @@
 
 (defun read-corsika (fstream)
   "Read Corsika binary output to a `run' struct."
-  (%reset-block-counter)
-  (%read-run fstream (%read-sub-block fstream)))
+  (let ((block-counter 0))
+    (declare (special block-counter))
+    (%read-run fstream (%read-sub-block fstream))))
 
 (defmacro with-open-corsika ((corsika filespec) &body body)
   "With corsika run structure as `corsika' from `filespec'."
