@@ -42,7 +42,7 @@ Keywords:
 + `theta' for zenith angle (degree), `0.0' for single angle,
   or `(0.0 45.0)' for range;
 + `phi' for azimuth angle (degree), same like `theta';
-+ 
++
 
 See:
 `cl-corsika/input::prmpar', `cl-corsika/input::prmpar',
@@ -163,7 +163,7 @@ Note: directory starting with `.' will be ignored. "
 
 ;; 3.1.2 EPOS Option
 ;; for using EPOS you first have to select EPOS option when extracting the
-;; FORTRAN code from the source file. 
+;; FORTRAN code from the source file.
 
 ;; Dump from all-inputs-epos in run/ subdirectory in corsika-77500
 (defun setup-epos (&key (input "epos.param")
@@ -211,9 +211,9 @@ See: `cl-corsika/input::epos', `cl-corsika/input::epopar'. "
       (set-epopar histo)
       (set-epopar data)
       (set-epopar copy)))
-  
+
   ;; The EPOS cross-sections are selected automati- cally when the EPOS option
-  ;; has been used for extracting the FORTRAN code from the source file. 
+  ;; has been used for extracting the FORTRAN code from the source file.
   (eposig cross-section))
 
 ;; 3.1.3 HDPM Routines
@@ -235,11 +235,20 @@ See: `cl-corsika/input::epos', `cl-corsika/input::epopar'. "
 ;; 3.3.1 NKG Treatment
 ;; 3.3.2 EGS4 Treatment
 
+(defparameter model-spell-checker
+  (make-fuzzy-matcher (mapcar (lambda (key) (format nil "~A" key))
+			      '(:hadron-ecut :muon-ecut :electrons-ecut :photons-ecut
+				:hadflg :scatter-step :addition-info :use-NKG
+				:NKG-outer-radius :use-EGS4 :longitudinal-info
+				:longitudinal-step :longitudinal-fit
+				:longitudinal-out)))
+  "Spell check for `setup-model'. ")
+
 ;; Setup model
 (defun setup-model (high-energy low-energy
                     &rest args
                     &key
-                      ;; hadron model                      
+                      ;; hadron model
                       (hadron-ecut        0.3)
                       (muon-ecut          0.3)
                       (electrons-ecut     0.003)
@@ -282,10 +291,14 @@ Keywords:
   + `:nu' or `:neutrino': additional neutrino information;
   + a list containing above options, like (:muon :em);
   + `:all' for all of the above, equal to (:muon :em :neutrino);
-  
+
   see Corsika GUIDE 7.7500 Table 10,
   or `cl-corsika/binary:particle-data-sub-block';
 "
+  (loop for key in args by #'cddr
+	for word = (format nil "~A" word)
+	do (funcall model-spell-checker key))
+
   ;; hadronic model for high energy
   (ecase high-energy
     (:EPOS    (apply #'setup-epos args)))
@@ -374,7 +387,7 @@ See:
 `cl-corsika/input::atmc', `cl-corsika/input::atmlay'. "
   (obslev (float altitude))
   (arrang (float array-rotation))
-  
+
   ;; setup the earth magnet
   (let ((h-mag (if horizontal-mag-set? horizontal-mag (car magnet)))
         (v-mag (if vertical-mag-set?   vertical-mag   (cdr magnet))))
@@ -402,9 +415,16 @@ See:
         (t (error "Malformed `atomsphere' input. "))))
 
 ;; ========== Random Number Sequence Set Up ==========
-;; this should be called within the `setup-utils'. 
+;; this should be called within the `setup-utils'.
 
-(defun setup-random-seed (&key
+(defparameter random-spell-checker
+  (make-fuzzy-matcher (mapcar (lambda (key) (format nil "~A" key))
+			      '(:init-calls :hadron-seed :EGS4-seed
+				:CERENKOV-seed :IACT-seed :HERWIG-seed
+				:PARALLEL-seed :CONEX-seed)))
+  "Spell check for `setup-random-seed'. ")
+
+(defun setup-random-seed (&rest args &key
                             (init-calls    0)
                             (hadron-seed   1)
                             (EGS4-seed     2)
@@ -423,9 +443,13 @@ Keywords:
       ISEED(2, k) = N_{in} % 1,000,000,000
       ISEED(3, k) = floor(N_{in}, 1,000,000,000)
 + `hadron', `EGS4', `CERENKOV', `IACT', `HERWIG', `PARALLEL'
-  and `CONEX' are seed number for ISEED(1, k). 
+  and `CONEX' are seed number for ISEED(1, k).
 
 See: `cl-corsika/input::seed'. "
+  (loop for key in args by #'cddr
+	for word = (format nil "~A" word)
+	do (funcall random-spell-checker key))
+
   (let ((iseed2 (mod   init-calls 1000000000))
         (iseed3 (floor init-calls 1000000000)))
     (seed hadron-seed iseed2 iseed3)
@@ -454,7 +478,7 @@ See: `cl-corsika/input::seed'. "
 ;; ========== Simulation Utilities ==========
 
 ;; `*run-id*' should be automatically increased when
-;; starting a new simulation. 
+;; starting a new simulation.
 (defparameter *run-id* 1
   "The number of run. ")
 
@@ -491,16 +515,16 @@ Keywords:
   (declare (ignorable debug))
   (runnr  run-id)
   (evtnr  start-event)
-  
+
   ;; setup random number seeds
   (apply  #'setup-random-seed args)
 
   ;; data base file
   (datbas data-base)
-  
+
   ;; setup debug info
   (apply #'setup-debug args)
-  
+
   (maxprt print-event)
   (direct (format nil "~A" (truename (uiop:ensure-directory-pathname dir))))
   (user   user))

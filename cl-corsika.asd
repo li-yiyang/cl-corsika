@@ -40,4 +40,5 @@
   :components ((:file "package")
                (:file "def-input")
                (:file "corsika-inputs")
+	       (:file "did-you-mean")
                (:file "wrapper")))
