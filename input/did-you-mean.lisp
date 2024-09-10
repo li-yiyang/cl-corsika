@@ -60,8 +60,8 @@ while 1 means exact match."
    `fuzzy-match-levidist', if distance is less than `threshold',
    throw warning of Did you mean.
 "
-  (let ((dictionary (mapcar #'string-upcase dictionary))
-	(white-list (mapcar #'string-upcase white-list)))
+  (let* ((dictionary (mapcar #'string-upcase dictionary))
+	 (white-list (append dictionary (mapcar #'string-upcase white-list))))
     (lambda (word)
       (let ((word (string-upcase word)))
 	(unless (member word white-list :test #'string=)
