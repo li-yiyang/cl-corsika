@@ -5,6 +5,7 @@
    #:search-command
    #:set-corsika-source-path
    #:*max-corsika-path-search-depth*
+   #:*corsika-random-seed-uplimit*
    #:search-corsika-path
    #:*corsika-source-path*
    #:with-corsika-input

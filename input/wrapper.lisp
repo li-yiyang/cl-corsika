@@ -424,16 +424,23 @@ See:
 				:PARALLEL-seed :CONEX-seed)))
   "Spell check for `setup-random-seed'. ")
 
-(defun setup-random-seed (&rest args &key
-                            (init-calls    0)
-                            (hadron-seed   1)
-                            (EGS4-seed     2)
-                            (CERENKOV-seed 3 cerenkov-set?)
-                            (IACT-seed     4 IACT-set?)
-                            (HERWIG-seed   5 HERWIG-set?)
-                            (PARALLEL-seed 6 PARALLEL-set?)
-                            (CONEX-seed    7 CONEX-set?)
-                          &allow-other-keys)
+(defparameter *corsika-random-seed-uplimit*
+  900000000
+  "The uplimit of random seed initial value.
+By default it's `900000000'. ")
+
+(defun setup-random-seed
+    (&rest args
+     &key
+       (init-calls    0)
+       (hadron-seed   (random *corsika-random-seed-uplimit*))
+       (EGS4-seed     (random *corsika-random-seed-uplimit*))
+       (CERENKOV-seed (random *corsika-random-seed-uplimit*) cerenkov-set?)
+       (IACT-seed     (random *corsika-random-seed-uplimit*) IACT-set?)
+       (HERWIG-seed   (random *corsika-random-seed-uplimit*) HERWIG-set?)
+       (PARALLEL-seed (random *corsika-random-seed-uplimit*) PARALLEL-set?)
+       (CONEX-seed    (random *corsika-random-seed-uplimit*) CONEX-set?)
+     &allow-other-keys)
   "Set up random number seeds.
 
 Keywords:
@@ -452,18 +459,23 @@ See: `cl-corsika/input::seed'. "
 
   (let ((iseed2 (mod   init-calls 1000000000))
         (iseed3 (floor init-calls 1000000000)))
-    (seed hadron-seed iseed2 iseed3)
-    (seed EGS4-seed   iseed2 iseed3)
-    (when (or CERENKOV-set? IACT-set? HERWIG-set? PARALLEL-set? CONEX-set?)
-      (seed CERENKOV-seed iseed2 iseed3))
-    (when (or IACT-set? HERWIG-set? PARALLEL-set? CONEX-set?)
-      (seed IACT-seed iseed2 iseed3))
-    (when (or HERWIG-set? PARALLEL-set? CONEX-set?)
-      (seed HERWIG-seed iseed2 iseed3))
-    (when (or PARALLEL-set? CONEX-set?)
-      (seed PARALLEL-seed iseed2 iseed3))
-    (when CONEX-set?
-      (seed CONEX-seed iseed2 iseed3))))
+    (flet ((set-seed (seed)
+	     (if (listp seed)
+		 (destructuring-bind (s1 s2 s3) seed
+		   (seed s1 s2 s3))
+		 (seed seed iseed2 iseed3))))
+      (set-seed hadron-seed)
+      (set-seed EGS4-seed)
+      (when (or CERENKOV-set? IACT-set? HERWIG-set? PARALLEL-set? CONEX-set?)
+	(set-seed CERENKOV-seed))
+      (when (or IACT-set? HERWIG-set? PARALLEL-set? CONEX-set?)
+	(set-seed IACT-seed))
+      (when (or HERWIG-set? PARALLEL-set? CONEX-set?)
+	(set-seed HERWIG-seed))
+      (when (or PARALLEL-set? CONEX-set?)
+	(set-seed PARALLEL-seed))
+      (when CONEX-set?
+	(set-seed CONEX-seed)))))
 
 ;; ========== Debug Infomation ==========
 ;; this should be called within the `setup-utils'.
