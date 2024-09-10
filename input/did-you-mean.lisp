@@ -66,5 +66,5 @@ while 1 means exact match."
       (let ((word (string-upcase word)))
 	(unless (member word white-list :test #'string=)
 	  (loop for test in dictionary do
-	    (when (>= (norm-levenshtein word test) threshold)
+	    (when (< threshold (norm-levenshtein word test) 1.0)
 	      (warn (format nil "Did you mean: ~A for ~A" test word)))))))))
